@@ -17,7 +17,7 @@ from flask import Flask, jsonify
 #################################################
 # Database Setup
 #################################################
-engine = create_engine("sqlite:///hawaii.sqlite")
+engine = create_engine("sqlite:///Resources/hawaii.sqlite")
 
 # reflect an existing database into a new model
 Base = automap_base()
@@ -28,9 +28,6 @@ Base.prepare(autoload_with=engine)
 Measurement = Base.classes.measurement
 Station = Base.classes.station
 
-# Create our session (link) from Python to the DB
-session = Session(engine)
-
 #################################################
 # Flask Setup
 #################################################
@@ -40,13 +37,17 @@ app = Flask(__name__)
 @app.route("/")
 def welcome():
     return (
-        f"Available Routes:<br/>"
+        f"Available Static Routes:<br/><br/>"
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
-        f"/api/v1.0/tobs<br/>"
-        f"/api/v1.0/<start><br/>"
-        f"/api/v1.0/<start>/<end><br/>"
+        f"/api/v1.0/tobs<br/><br/>"
+        f"Summary Statistics Dynamic Date Range Routes:<br/><br/>"
+        f"~~~ start (enter as YYYY-MM-DD)<br/>"
+        f"/api/v1.0/start/ <br/>"
+        f"~~~ start/end  (enter as YYYY-MM-DD/YYYY-MM-DD)<br/>"
+        f"/api/v1.0/start/end"
     )
+    
 
 #################################################
 # Flask Routes
@@ -122,9 +123,69 @@ def tobs():
     
     return jsonify(temperatures)
 
+# dynamic dates route start to end of data
+@app.route("/api/v1.0/<start>")
+
+def summary_stats_start(start):
     
+    # acknowledge server request
+    print("Server received request for 'summary stats' page...")
+    
+    # define variables
+    selection = [func.min(Measurement.tobs),
+                        func.round(func.avg(Measurement.tobs), 2),
+                        func.max(Measurement.tobs)]
+    
+    # start your session engines!
+    session = Session(engine)   
+        
+    # save session query
+    results = session.query(*selection).\
+        filter(Measurement.date >= start).all()
+    session.close()
+        
+    # save list from list of tuples
+    summary_stats = list(np.ravel(results))
+    # insert labels
+    summary_stats.insert(0, 'Minimum Temperature')
+    summary_stats.insert(2, 'Average Temperature')
+    summary_stats.insert(4, 'Maximum Temperature')
+        
+    return jsonify(summary_stats)
+
+# dynamic dates route start to end
+@app.route("/api/v1.0/<start>/<end>")
+
+def summary_stats_start_end(start, end):
+    
+    # acknowledge server request
+    print("Server received request for 'summary stats' page...")
+    
+    # define variables
+    selection = [func.min(Measurement.tobs),
+                        func.round(func.avg(Measurement.tobs), 2),
+                        func.max(Measurement.tobs)]
+    
+    # start your session engines!
+    session = Session(engine)   
+        
+    # save session query
+    results = session.query(*selection).\
+        filter(Measurement.date >= start).\
+        filter(Measurement.date <= end).all()
+    session.close()
+        
+    # save list from list of tuples
+    summary_stats = list(np.ravel(results))
+    # insert labels
+    summary_stats.insert(0, 'Minimum Temperature')
+    summary_stats.insert(2, 'Average Temperature')
+    summary_stats.insert(4, 'Maximum Temperature')
+        
+    return jsonify(summary_stats) 
     
 
-
+if __name__ == '__main__':
+    app.run(debug=True)
 
 
