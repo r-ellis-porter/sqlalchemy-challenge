@@ -10,6 +10,9 @@ Welcome to the SQLAlchemy Climate Analysis project! This project aims to conduct
 
 - The most recent date in the dataset is 2017-08-23.
 - Precipitation data for the previous 12 months has been analyzed and visualized.
+
+![annual precipitation](SurfsUp/Images/annual_precip_chart.png)
+
 - Summary statistics for precipitation data:
   - Count: 2021
   - Mean: 0.177 inches
@@ -38,6 +41,8 @@ Welcome to the SQLAlchemy Climate Analysis project! This project aims to conduct
   - Highest Temperature: 85.0°F
   - Average Temperature: 71.66°F
 - Temperature observation data (TOBS) for the last 12 months has been analyzed and visualized as a histogram.
+
+![active station histogram](SurfsUp/Images/most_active_station_histogram.png)
 
 ### Summary
 
